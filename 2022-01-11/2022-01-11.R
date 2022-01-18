@@ -38,7 +38,7 @@ hexagon_dat <- colony %>%
 
 #### Plot ####
 
-ggplot(data = hexagon_dat %>% filter(months == "January-March")) +
+ggplot(data = hexagon_dat) +
   geom_regon(mapping = aes(x0 = x0,
                            y0 = y0,
                            sides = 6,
