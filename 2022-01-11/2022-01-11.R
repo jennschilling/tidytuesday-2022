@@ -10,6 +10,9 @@ library(extrafont)
 library(ggtext)
 library(scales)
 library(patchwork)
+library(magick)
+library(grid)
+library(ggpubr)
 
 #### Get the Data ####
 
@@ -117,6 +120,9 @@ honey_pal <- c(
   "#FDD975" # light yellow
 )
 
+# Bee Image
+bee <- image_read("2022-01-11\\bee.png")
+# Image attributed to Freepik.
 
 #### Plot ####
 
@@ -173,9 +179,19 @@ stress_plot <- ggplot(data = hexagon_dat_stressor) +
        x = "",
        y = "") +
   theme()
+
+bee_plot <- ggplot() +
+  background_image(bee) +
+  coord_fixed() +
+  theme(axis.line = element_blank())
   
 
 colony_plot + stress_plot +
+  # inset_element(bee_plot,
+  #               left = 0.5, 
+  #               bottom = 0.5, 
+  #               right = unit(1, 'npc') - unit(1, 'cm'), 
+  #               top = unit(1, 'npc') - unit(0.5, 'cm')) +
   plot_annotation(caption = "Data: <b>USDA</b> | Design: <b>Jenn Schilling</b>")
 
 
