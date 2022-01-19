@@ -20,10 +20,10 @@ hexagon_dat <- colony %>%
     year == 2015 ~ 0,
     year == 2016 ~ lag(colony_lost_pct, 1) + colony_lost_pct / 2,
     year == 2017 ~ lag(colony_lost_pct, 2) + colony_lost_pct / 2,
-    year == 2018 ~ 2*lag(colony_lost_pct, 3) + lag(colony_lost_pct, 1) + colony_lost_pct / 2,
-    year == 2019 ~ 2*lag(colony_lost_pct, 4) + lag(colony_lost_pct, 2) + colony_lost_pct / 2,
-    year == 2020 ~ 2*lag(colony_lost_pct, 5) + lag(colony_lost_pct, 3) + colony_lost_pct / 2,
-    year == 2021 ~ 2*lag(colony_lost_pct, 6) + 2*lag(colony_lost_pct, 5) + lag(colony_lost_pct, 2) +  colony_lost_pct / 2
+    year == 2018 ~ lag(colony_lost_pct, 3) + 2*lag(colony_lost_pct, 1) + colony_lost_pct / 2,
+    year == 2019 ~ lag(colony_lost_pct, 4) + 2*lag(colony_lost_pct, 2) + colony_lost_pct / 2,
+    year == 2020 ~ lag(colony_lost_pct, 5) + 2*lag(colony_lost_pct, 3) + colony_lost_pct / 2,
+    year == 2021 ~ lag(colony_lost_pct, 6) + 2*lag(colony_lost_pct, 5) + lag(colony_lost_pct, 3) +  colony_lost_pct / 2
   ),
   y0 = case_when(
     year == 2015 ~ 0,
@@ -32,7 +32,7 @@ hexagon_dat <- colony %>%
     year == 2018 ~ lead(colony_lost_pct, 1) + colony_lost_pct,
     year == 2019 ~ 0,
     year == 2020 ~ -lag(colony_lost_pct, 1) - colony_lost_pct,
-    year == 2021 ~ 0
+    year == 2021 ~ lag(colony_lost_pct, 1)
   ))
 
 
