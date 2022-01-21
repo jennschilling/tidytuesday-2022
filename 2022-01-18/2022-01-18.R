@@ -59,7 +59,7 @@ choc_dat <- chocolate %>%
 
 #### Formatting ####
 
-font <- "Trebuchet MS"
+font <- "Candara"
 title_font <- "Candara"
 font_color <- "#FAFAFA"
 b_color <- "#FFFEF2"
@@ -81,7 +81,7 @@ dec_colors <- c(
   "#B1FDBD" # green - Oceania
 )
 
-panel_col <- "#FFFEF2"
+panel_col <- "#BFA300"
 
 rectangle_sides <- "#4F3D0F"
 
@@ -94,8 +94,10 @@ theme_update(
   panel.background = element_rect(fill = panel_col, color = rectangle_sides, size = 4),
   plot.background = element_rect(fill = b_color, color = NA),
   
-  axis.title = element_text(size = 10, color = font_color),
-  axis.text = element_text(size = 9, color = font_color),
+  axis.title.x = element_text(size = 10, color = rectangle_sides, hjust = 1, face = "italic"),
+  axis.title.y = element_blank(),
+  axis.text.x = element_blank(),
+  axis.text.y = element_text(size = 10, color = rectangle_sides, hjust = 1, angle = 0),
   axis.ticks = element_blank(),
   axis.line = element_line(color = rectangle_sides, size = 2),
   
@@ -105,12 +107,12 @@ theme_update(
   legend.title = element_text(size = 10, color = font_color),
   
   plot.title.position = "plot",
-  plot.title = element_markdown(size = 12, color = rectangle_sides, family = title_font),
+  plot.title = element_markdown(size = 16, color = rectangle_sides, family = title_font),
   
   plot.subtitle = element_markdown(size = 10, color = rectangle_sides),
   
   plot.caption.position = "plot",
-  plot.caption = element_markdown(size = 8, color = rectangle_sides),
+  plot.caption = element_markdown(size = 9, color = rectangle_sides),
   
   plot.margin = margin(t = 10, r = 10, b = 10, l = 10)
 )
@@ -155,7 +157,7 @@ make_grid <- function(length, width, radius){
 
 width <- 5
 length <- 4
-radius <- 0.5
+radius <- 0.8
 
 coord_grid <- make_grid(length, width, radius)
 
@@ -170,10 +172,36 @@ choc_coord_grid <- bind_cols(choc_grid, coord_grid) %>%
          ),
          angle = 0)
 
+box_radius <- 1.5
+
+box_grid <- make_grid(length, width, box_radius) %>%
+  mutate(sides = 4,
+         angle = 0)
+
 
 #### Plot ####
 
 ggplot() +
+  # Square background
+  geom_regon(data = box_grid,
+             mapping = aes(x0 = x,
+                           y0 = y,
+                           r = r,
+                           sides = sides,
+                           angle = angle),
+             fill = b_color,
+             color = NA) +
+  # Square border
+  geom_regon(data = box_grid,
+             mapping = aes(x0 = x,
+                           y0 = y,
+                           r = r,
+                           sides = sides,
+                           angle = angle),
+             fill = NA,
+             color = rectangle_sides,
+             size = 2) +
+  # Chocolate shapes
   geom_circle(data = choc_coord_grid %>% filter(cont_of_bean_origin == "Americas"),
               mapping = aes(x0 = x,
                             y0 = y,
@@ -185,7 +213,12 @@ ggplot() +
                            y0 = y,
                            r = r,
                            fill = percent_fill,
-                           sides = sides, 
+                           sides = sides,
                            angle = angle),
              color = NA) +
-  scale_fill_identity()
+  scale_fill_identity() +
+  scale_y_continuous(breaks = c(1, 9),
+                     labels = c("Low\nRating", "High\nRating")) +
+  labs(title = "Life is like a box of chocolates...you never know what you're going to get.<br>",
+       x = "Sample of 20 chocolates",
+       caption = "<br>Data: <b>Flavors of Cacao</b> | Design: <b>Jenn Schilling</b>")
