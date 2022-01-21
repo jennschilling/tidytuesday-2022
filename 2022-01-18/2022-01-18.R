@@ -57,39 +57,15 @@ choc_dat <- chocolate %>%
   rename(cont_company_location = continent,
          reg_company_location = region) 
 
-
-## Plan ##
-# 1. Sample 20 chocolates - removing NAs from continent or region of company/bean location, number of ingredients, cocoa percent, rating
-# 2. Arrange chocolates from highest rated to lowest rated in a grid
-# 3. Fill shape by cocoa percent
-# 4. Type of shape by continent of bean location (number of sides)
-# 5. Color of decoration by continent of company 
-# 6. Number of decorations by number of ingredients
-
-choc_dat_sample <- choc_dat %>%
-  select(cont_company_location, cont_of_bean_origin, num_ingredients, cocoa_percent, rating) %>%
-  filter(complete.cases(.))
-
-# Step 1 - Sample
-get_choc_sample <- slice_sample(choc_dat_sample, n = 20)
-
-# Step 2 - Create Grid
-choc_grid <- get_choc_sample %>%
-  arrange(-rating) %>%
-  mutate(radius = 1)
-
-
-
-
 #### Formatting ####
 
 font <- "Trebuchet MS"
 title_font <- "Candara"
-fontcolor <- "#FAFAFA"
-bcolor <- "#3F3F3F"
+font_color <- "#FAFAFA"
+b_color <- "#FFFEF2"
 
 choc_colors <- c(
-  "#EEE1D0", # white chocolate
+#  "#EEE1D0", # white chocolate
   "#A6705D", # light brown
   "#8C5946",
   "#593325",
@@ -105,7 +81,7 @@ dec_colors <- c(
   "#B1FDBD" # green - Oceania
 )
 
-gold <- "#D9AE30"
+panel_col <- "#FFFEF2"
 
 rectangle_sides <- "#4F3D0F"
 
@@ -115,36 +91,101 @@ theme_update(
   panel.grid.minor = element_blank(),
   panel.grid.major = element_blank(),
   
-  panel.background = element_rect(fill = gold, color = NA),
-  plot.background = element_rect(fill = bcolor, color = NA),
+  panel.background = element_rect(fill = panel_col, color = rectangle_sides, size = 4),
+  plot.background = element_rect(fill = b_color, color = NA),
   
-  axis.title = element_text(size = 10, color = fontcolor),
-  axis.text = element_text(size = 9, color = fontcolor),
-  axis.ticks = element_line(color = fontcolor),
-  axis.line = element_line(color = fontcolor),
+  axis.title = element_text(size = 10, color = font_color),
+  axis.text = element_text(size = 9, color = font_color),
+  axis.ticks = element_blank(),
+  axis.line = element_line(color = rectangle_sides, size = 2),
   
-  strip.text = element_text(size = 10, color = fontcolor, hjust = 0),
+  strip.text = element_text(size = 10, color = font_color, hjust = 0),
   
-  legend.text = element_text(size = 10, color = fontcolor),
-  legend.title = element_text(size = 10, color = fontcolor),
+  legend.text = element_text(size = 10, color = font_color),
+  legend.title = element_text(size = 10, color = font_color),
   
   plot.title.position = "plot",
-  plot.title = element_markdown(size = 12, color = fontcolor, family = title_font),
+  plot.title = element_markdown(size = 12, color = rectangle_sides, family = title_font),
   
-  plot.subtitle = element_markdown(size = 10, color = fontcolor),
+  plot.subtitle = element_markdown(size = 10, color = rectangle_sides),
   
   plot.caption.position = "plot",
-  plot.caption = element_markdown(size = 8, color = fontcolor),
+  plot.caption = element_markdown(size = 8, color = rectangle_sides),
   
   plot.margin = margin(t = 10, r = 10, b = 10, l = 10)
 )
 
+#### Make Grid ####
+
+## Plan ##
+# 1. Sample 20 chocolates - removing NAs from continent or region of company/bean location, number of ingredients, cocoa percent, rating
+# 2. Arrange chocolates from highest rated to lowest rated in a grid
+# 3. Fill shape by cocoa percent
+# 4. Type of shape by continent of bean location (number of sides)
+# 5. Color of decoration by continent of company 
+# 6. Number of decorations by number of ingredients
+
+choc_dat_sample <- choc_dat %>%
+  select(cont_company_location, cont_of_bean_origin, num_ingredients, cocoa_percent, rating) %>%
+  filter(complete.cases(.))
+
+# Step 1 - Sample
+sample_size <- 20
+
+get_choc_sample <- slice_sample(choc_dat_sample, n = sample_size)
+
+# Step 2 - Create Grid
+choc_grid <- get_choc_sample %>%
+  arrange(rating) 
+
+make_grid <- function(length, width, radius){
+
+  x <- seq(from = 2, to = width*2, by = 2) 
+  y <- seq(from = 2, to = length*2, by = 2) 
+
+  coords <- expand_grid(x, y)
+
+  r <- rep(radius, nrow(coords))
+
+  grid <- bind_cols(coords, r = r)
+  
+  return(grid)
+
+}
+
+width <- 5
+length <- 4
+radius <- 0.5
+
+coord_grid <- make_grid(length, width, radius)
+
+choc_coord_grid <- bind_cols(choc_grid, coord_grid) %>%
+  arrange(-cocoa_percent) %>%
+  mutate(percent_fill = colorRampPalette(choc_colors)(sample_size),
+         sides = case_when(
+           cont_of_bean_origin == "Africa" ~ 3,
+           cont_of_bean_origin == "Asia" ~ 4,
+           cont_of_bean_origin == "Ocenia" ~ 5,
+           TRUE ~ 0
+         ),
+         angle = 0)
 
 
 #### Plot ####
 
-# Can't do this because there is more than 1 intersection at each combination
-ggplot(data = chocolate) +
-  geom_tile(mapping = aes(x = cocoa_percent,
-                          y = ingredients,
-                          fill = rating))
+ggplot() +
+  geom_circle(data = choc_coord_grid %>% filter(cont_of_bean_origin == "Americas"),
+              mapping = aes(x0 = x,
+                            y0 = y,
+                            r = r,
+                            fill = percent_fill),
+              color = NA) +
+  geom_regon(data = choc_coord_grid %>% filter(cont_of_bean_origin != "Americas"),
+             mapping = aes(x0 = x,
+                           y0 = y,
+                           r = r,
+                           fill = percent_fill,
+                           sides = sides, 
+                           angle = angle),
+             color = NA) +
+  scale_fill_identity()
