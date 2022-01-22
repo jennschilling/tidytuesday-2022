@@ -255,7 +255,7 @@ choc_dat_sample <- choc_dat %>%
 
 #### Step 1 - Sample ####
 sample_size <- 20
-num <- 5
+num <- 11
 
 get_choc_sample <- slice_sample(choc_dat_sample, n = sample_size)
 
