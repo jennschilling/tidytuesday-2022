@@ -114,7 +114,7 @@ ggplot() +
   coord_cartesian(clip = "off") +
   guides(color = "none") +
   labs(y = "Rank",
-       title = "Labrador Retreievers are consistently the most popular dog while French Bulldogs have made large gains in popularity.<br>",
+       title = "Labrador Retrievers are consistently the most popular dog while French Bulldogs have made large gains in popularity.<br>",
        caption = "<br>Data: <b>American Kennel Club</b> | Design: <b>Jenn Schilling</b>")
 
 ggsave("2022-02-01\\dog_breeds.png",
