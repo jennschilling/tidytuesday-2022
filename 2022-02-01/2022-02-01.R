@@ -25,7 +25,8 @@ top_10 <- breed_rank_all %>%
                names_to = "year",
                values_to = "rank") %>%
   mutate(year = parse_number(year),
-         # This is really just to put Dachsunds below everything else since they only appear in 2013 and 2020 and I don't want the between those years to show
+         # This is puts Dachshunds below everything so the line does not show
+         # and French Bulldogs on top of everything to highlight the gains
          breed = factor(breed,
                         levels = c("Dachshunds",
                                    "Retrievers (Labrador)",
