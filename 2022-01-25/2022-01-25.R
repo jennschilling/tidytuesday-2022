@@ -5,39 +5,34 @@
 #### Libraries ####
 
 library(tidyverse)
-library(ggforce)
 library(extrafont)
 library(ggtext)
 library(scales)
-library(patchwork)
 
 #### Get the Data ####
 
 ratings <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/ratings.csv')
 details <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-01-25/details.csv')
 
-#### Functions ####
+#### Process the Data ####
 
-# Grid Function
-make_grid <- function(length, width, radius){
-  
-  x <- seq(from = 2, to = width*2, by = 2) 
-  y <- seq(from = 2, to = length*2, by = 2) 
-  
-  coords <- expand_grid(x, y)
-  
-  r <- rep(radius, nrow(coords))
-  
-  grid <- bind_cols(coords, r = r)
-  
-  return(grid)
-  
-}
+games <- left_join(ratings, details, by = "id") %>%
+  mutate(category = str_split(boardgamecategory, ",")) %>%
+  unnest(category) %>%
+  mutate(category = str_replace_all(category, "\\'|\\[|\\]", ""),
+         category = str_replace_all(category, '\\"', ""),
+         category = str_squish(category))
 
+top_categories <- games %>%
+  count(category) %>%
+  slice_max(order_by = n, n = 10) %>%
+  select(-n)
+
+top_cat_games <- left_join(top_categories, games, by = "category")
 
 #### Formatting ####
 
-font <- "Trebuchet MS"
+font <- "Candara"
 title_font <- "Candara"
 fontcolor <- "gray30"
 bcolor <- "#F8F8F8"
@@ -73,3 +68,10 @@ theme_update(
 )
 
 #### Plot ####
+
+ggplot(data = top_cat_games) +
+  geom_point(mapping = aes(x = category,
+                           y = bayes_average,
+                           color = minplayers),
+             position = position_jitter(),
+             alpha = 0.5)
