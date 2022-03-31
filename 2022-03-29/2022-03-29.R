@@ -20,12 +20,16 @@ sports_sub <- sports %>%
   group_by(year) %>%
   summarise(total_part_men = sum(sum_partic_men, na.rm = TRUE),
             total_part_women = sum(sum_partic_women, na.rm = TRUE),
-            med_rev_men = median(rev_men, na.rm = TRUE),
-            med_rev_women = median(rev_women, na.rm = TRUE),
-            med_exp_men = median(exp_men, na.rm = TRUE),
-            med_exp_women = median(exp_women, na.rm = TRUE),
+           # med_rev_men = median(rev_men, na.rm = TRUE),
+           # med_rev_women = median(rev_women, na.rm = TRUE),
+           # med_exp_men = median(exp_men, na.rm = TRUE),
+           # med_exp_women = median(exp_women, na.rm = TRUE),
+            total_rev_men = sum(rev_men, na.rm = TRUE),
+            total_rev_women = sum(rev_women, na.rm = TRUE),
+            total_exp_men = sum(exp_men, na.rm = TRUE),
+            total_exp_women = sum(exp_women, na.rm = TRUE),
             .groups = "drop") %>%
-  pivot_longer(total_part_men:med_exp_women) %>%
+  pivot_longer(total_part_men:total_exp_women) %>%
   separate(name, c("metric", "measure", "gender"), "_") %>%
   mutate(metric = paste(metric, measure, sep = "_")) %>%
   select(-measure)
@@ -70,84 +74,34 @@ theme_update(
 #### Plot ####
 
 ggplot() +
-  geom_col(data = sports_sub %>% filter(metric == "total_part" & gender == "men"),
+  geom_col(data = sports_sub %>% filter(gender == "men"),
            mapping = aes(y = value,
                          x = year,
                          fill = gender),
            width = 1,
-           position = position_jitter(width = 0.1, height = 0)) +
-  geom_col(data = sports_sub %>% filter(metric == "total_part" & gender == "women"),
+           position = position_jitter(width = 0, height = 0)) +
+  geom_col(data = sports_sub %>% filter(gender == "women"),
            mapping = aes(y = value,
                          x = year,
                          fill = gender),
            width = 0.75,
-           position = position_jitter(width = 0.1, height = 0)) +
-  geom_col(data = sports_sub %>% filter(metric == "total_part" & gender == "men"),
+           position = position_jitter(width = 0, height = 0)) +
+  geom_col(data = sports_sub %>% filter(gender == "men"),
            mapping = aes(y = -value,
                          x = year,
                          fill = gender),
            width = 1,
-           position = position_jitter(width = 0.1, height = 0)) +
-  geom_col(data = sports_sub %>% filter(metric == "total_part" & gender == "women"),
+           position = position_jitter(width = 0, height = 0)) +
+  geom_col(data = sports_sub %>% filter(gender == "women"),
            mapping = aes(y = -value,
                          x = year,
                          fill = gender),
            width = 0.75,
-           position = position_jitter(width = 0.1, height = 0)) +
+           position = position_jitter(width = 0, height = 0)) +
+
   
-  
-  geom_col(data = sports_sub %>% filter(metric == "med_exp" & gender == "men"),
-           mapping = aes(y = value,
-                         x = year,
-                         fill = gender),
-           width = 1,
-           position = position_jitter(width = 0.1, height = 0)) +
-  geom_col(data = sports_sub %>% filter(metric == "med_exp" & gender == "women"),
-           mapping = aes(y = value,
-                         x = year,
-                         fill = gender),
-           width = 0.75,
-           position = position_jitter(width = 0.1, height = 0)) +
-  geom_col(data = sports_sub %>% filter(metric == "med_exp" & gender == "men"),
-           mapping = aes(y = -value,
-                         x = year,
-                         fill = gender),
-           width = 1,
-           position = position_jitter(width = 0.1, height = 0)) +
-  geom_col(data = sports_sub %>% filter(metric == "med_exp" & gender == "women"),
-           mapping = aes(y = -value,
-                         x = year,
-                         fill = gender),
-           width = 0.75,
-           position = position_jitter(width = 0.1, height = 0)) +
-  
-  
-  geom_col(data = sports_sub %>% filter(metric == "med_rev" & gender == "men"),
-           mapping = aes(y = value,
-                         x = year,
-                         fill = gender),
-           width = 1,
-           position = position_jitter(width = 0.1, height = 0)) +
-  geom_col(data = sports_sub %>% filter(metric == "med_rev" & gender == "women"),
-           mapping = aes(y = value,
-                         x = year,
-                         fill = gender),
-           width = 0.75,
-           position = position_jitter(width = 0.1, height = 0)) +
-  geom_col(data = sports_sub %>% filter(metric == "med_rev" & gender == "men"),
-           mapping = aes(y = -value,
-                         x = year,
-                         fill = gender),
-           width = 1,
-           position = position_jitter(width = 0.1, height = 0)) +
-  geom_col(data = sports_sub %>% filter(metric == "med_rev" & gender == "women"),
-           mapping = aes(y = -value,
-                         x = year,
-                         fill = gender),
-           width = 0.75,
-           position = position_jitter(width = 0.1, height = 0)) +
-  
-  facet_wrap(~metric, ncol = 1) +
+  facet_wrap(~ factor(metric, levels = c("total_part", "total_exp", "total_rev")),
+             ncol = 1, scales = "free") +
   
   scale_fill_manual(values = c("#02735e", "#fd7d00")) +
   
@@ -156,5 +110,5 @@ ggplot() +
                   clip = "off") +
   theme_void() +
   theme(strip.text = element_blank(),
-        panel.spacing = unit(0, "lines"))
+        panel.spacing = unit(0.2, "lines"))
 
