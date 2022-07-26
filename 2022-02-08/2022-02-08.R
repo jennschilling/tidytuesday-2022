@@ -13,6 +13,10 @@ library(ggtext)
 
 airmen <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-02-08/airmen.csv')
 
+airmen <- airmen %>%
+  mutate(state = str_to_upper(state),
+         state = ifelse(is.na(state), "UNK", state))
+
 #### Formatting ####
 
 font <- "Trebuchet MS"

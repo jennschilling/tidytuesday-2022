@@ -1,0 +1,145 @@
+---
+title: "Tidy Tuesday July 19"
+author: "Jenn Schilling"
+date: '2022-07-26'
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+
+# Libraries
+library(here)
+library(tidyverse)
+library(scales)
+library(ggtext)
+library(showtext)
+library(explore)
+
+
+# Formatting
+
+# Font
+font_add_google(name = "Montserrat")
+showtext_auto()
+
+# Colors
+sds_colors <- c(
+ "#53868b", #steel-teal  
+ "#f18805", #tangerine
+ "#3f5a00", #dark-moss-green
+ "#5d4e6d", #english-violet 
+ "#e9eff4", #alice-blue
+ "#d6c9c9" #pale-silver 
+)
+
+# Plot
+font <- "Montserrat"
+font_color <- "#1A1A1A" # gray
+line_color <- "#666666" # lighter gray
+bcolor <- "#e9eff4"
+
+theme_set(theme_minimal(base_size = 12, base_family = font))
+
+theme_update(
+  panel.grid.minor = element_blank(),
+  panel.grid.major = element_blank(),
+  
+  panel.background = element_rect(fill = bcolor, color = NA),
+  plot.background = element_rect(fill = bcolor, color = NA),
+  
+  axis.title = element_text(size = 26, color = font_color),
+  axis.text = element_text(size = 26, color = font_color),
+  axis.ticks = element_line(color = line_color),
+  
+  axis.line = element_line(color = line_color),
+  
+  strip.text = element_text(size = 26, color = font_color, hjust = 0),
+  
+  legend.text = element_text(size = 26, color = font_color),
+  legend.title = element_text(size = 26, color = font_color),
+  
+  plot.title.position = "plot",
+  plot.title = element_text(size = 32, color = font_color, lineheight = 0.3),
+  
+  plot.subtitle = element_text(size = 26, color = font_color, lineheight = 0.3),
+  
+  plot.caption.position = "plot",
+  plot.caption = element_text(size = 16, color = font_color, hjust = 1)
+)
+
+
+```
+
+
+```{r read-data}
+
+technology <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-07-19/technology.csv')
+
+```
+
+```{r explore-data}
+
+technology %>%
+  group_by(year) %>%
+  summarise(sum(value))
+
+explore(technology)
+
+table(technology$iso3c)
+
+technology_usa <- technology %>% filter(iso3c == "USA")
+
+```
+
+
+
+```{r graph-data}
+
+ggplot() +
+  geom_line(data = technology_usa %>% filter(variable == "aviation_pass"),
+            mapping = aes(x = year,
+                          y = value,
+                          group = variable),
+            size = 1,
+            color = sds_colors[4]) +
+  geom_point(data = technology_usa %>% filter(variable == "aviation_pass" &
+                                                year == 2020),
+             mapping = aes(x = year,
+                           y = value),
+             size = 2,
+             color = sds_colors[4]) +
+  geom_text(data = technology_usa %>% filter(variable == "aviation_pass" &
+                                                year == 2020),
+            mapping = aes(x = year,
+                          y = value,
+                          label = "COVID-19\nImpact"),
+            size = 6,
+            family = font,
+            color = sds_colors[4],
+            lineheight = 0.4,
+            vjust = 1,
+            nudge_y = -20000000) +
+  scale_y_continuous(labels = number_format(scale = 10e-10, suffix = "B"),
+                     limits = c(150000000, 1000000000)) +
+  coord_cartesian(clip = "off") +
+  labs(title = "Passengers carried on U.S. air transport increased over time, until the COVID-19\npandemic cut air travel by 60%. Air travel also declined after 9/11 and during\nthe Great Recession.", 
+       x = "Year",
+       y = "",
+       caption = "Data: data.nber.org | Design: Jenn Schilling") +
+  theme(plot.margin = margin(10, 20, 10, 10),
+        axis.line.y = element_blank())
+
+
+
+ggsave(here("2022-07-19", "us_air_transport.png"),
+       plot = last_plot(),
+       device = "png",
+       type = "cairo", 
+       width = 6,
+       height = 4)  
+
+
+```
+
+
