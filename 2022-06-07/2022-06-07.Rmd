@@ -1,0 +1,145 @@
+---
+title: "Tidy Tuesday June 7"
+author: "Jenn Schilling"
+date: '2022-07-27'
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+
+# Libraries
+library(here)
+library(tidyverse)
+library(scales)
+library(ggtext)
+library(showtext)
+library(janitor)
+library(ggrepel)
+
+# Formatting
+
+# Font
+font_add_google(name = "Montserrat")
+showtext_auto()
+
+# Plot
+font <- "Montserrat"
+font_color <- "#1A1A1A" # gray
+line_color <- "#666666" # lighter gray
+bcolor <- "#e9eff4" # alice-blue
+
+theme_set(theme_minimal(base_size = 12, base_family = font))
+
+theme_update(
+  panel.grid.minor = element_blank(),
+  panel.grid.major = element_blank(),
+  
+  panel.background = element_rect(fill = bcolor, color = NA),
+  plot.background = element_rect(fill = bcolor, color = NA),
+  
+  axis.title = element_text(size = 26, color = font_color),
+  axis.text = element_text(size = 26, color = font_color),
+  axis.ticks = element_line(color = line_color),
+  
+  axis.line = element_line(color = line_color),
+  
+  strip.text = element_text(size = 26, color = font_color, hjust = 0),
+  
+  legend.text = element_text(size = 26, color = font_color),
+  legend.title = element_text(size = 26, color = font_color),
+  
+  plot.title.position = "plot",
+  plot.title = element_text(size = 32, color = font_color, lineheight = 0.3),
+  
+  plot.subtitle = element_text(size = 26, color = font_color, lineheight = 0.3),
+  
+  plot.caption.position = "plot",
+  plot.caption = element_text(size = 16, color = font_color, hjust = 1)
+)
+
+
+```
+
+
+```{r read-data}
+
+pride_aggregates <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-06-07/pride_aggregates.csv')
+
+pride_aggregates_c <- pride_aggregates %>%
+  clean_names() %>%
+  filter(company != "Grand Total")
+
+```
+
+
+```{r graph-data}
+
+ggplot() +
+  geom_point(data = pride_aggregates_c,
+             mapping = aes(x = total_contributed,
+                           y = number_of_politicians_contributed_to,
+                           size = number_of_states_where_contributions_made),
+             alpha = 0.8,
+             color = "#213262") +
+  geom_text(data = pride_aggregates_c %>% 
+              filter(total_contributed > 30000 & company != "Enterprise" & company != "Budweiser" &
+                       company != "Jack Daniel's (Brown-Forman)" & company != "Amazon"),
+            mapping = aes(x = total_contributed,
+                          y = number_of_politicians_contributed_to,
+                          label = company),
+            size = 6,
+            family = font,
+            color = font_color,
+            hjust = 0,
+            vjust = -1.8) +
+  geom_text(data = pride_aggregates_c %>% filter(company == "Enterprise"),
+            mapping = aes(x = total_contributed,
+                          y = number_of_politicians_contributed_to,
+                          label = company),
+            size = 6,
+            family = font,
+            color = font_color,
+            hjust = 1,
+            vjust = -1.9) +
+  geom_text(data = pride_aggregates_c %>% filter(company == "Budweiser"),
+            mapping = aes(x = total_contributed,
+                          y = number_of_politicians_contributed_to,
+                          label = company),
+            size = 6,
+            family = font,
+            color = font_color,
+            hjust = 1,
+            vjust = -1.4) +
+  geom_text(data = pride_aggregates_c %>% filter(company == "Jack Daniel's (Brown-Forman)" | company == "Amazon"),
+            mapping = aes(x = total_contributed,
+                          y = number_of_politicians_contributed_to,
+                          label = company),
+            size = 6,
+            family = font,
+            color = font_color,
+            hjust = 0,
+            vjust = -0.8) +
+  scale_y_continuous(limits = c(0, 70),
+                     breaks = seq(0, 70, 10)) +
+  scale_x_continuous(labels = dollar_format(scale = 10e-4, suffix = "k")) +
+  guides(size = "none") +
+  labs(x = "Total Amount Contributed",
+       y = "Number of Politicians Contributed To",
+       title = "30 Pride Sponsors donated a total of $1.6 million to Anti-LGBTQ+ Politicians.",
+       subtitle = "Size represents the number of states where contribution to Anti-LGBTQ+ Politicians were made.",
+       caption = "Data: Data for Progress | Design: Jenn Schilling") 
+
+
+ggsave(here("2022-06-07", "pride_sponsors.png"),
+       plot = last_plot(),
+       device = "png",
+       type = "cairo", 
+       width = 6,
+       height = 4) 
+
+```
+
+
+
+
