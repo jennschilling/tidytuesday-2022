@@ -109,7 +109,7 @@ ggplot() +
   coord_cartesian(clip = "off") +
   scale_color_manual(values = c("#53868b", "#f18805")) +
   labs(x = "Height (ft)",
-       title = "The tallest ferris wheels are still being built.",
+       title = "The tallest Ferris wheels are still being built.",
        subtitle =  "",
        caption = "\nData {ferriswheels} by Emil Hvitfeldt | Design Jenn Schilling") +
   theme(plot.margin = margin(25, 25, 25, 25),
