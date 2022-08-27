@@ -67,7 +67,10 @@ sc_chars <- characters %>%
 
 sc_chars_radar <- sc_chars %>%
   select(name, image_link, avg_rating_adj, personality_adj) %>%
-  mutate(avg_rating_adj = avg_rating_adj / 100,
+  mutate(name = factor(name, levels = c("Alexis Rose", "Ted Mullens",
+                                        "Moira Rose", "Johnny Rose",
+                                        "David Rose", "Stevie Budd")),
+         avg_rating_adj = avg_rating_adj / 100,
          group = name,
          personality_adj = str_to_sentence(personality_adj)) %>%
   pivot_wider(names_from = personality_adj,
@@ -95,30 +98,45 @@ p <- ggradar(plot.data = sc_chars_radar %>% select(-image_link, -name),
         gridline.mid.colour = line_color,
         gridline.max.colour = line_color,
         axis.line.colour = line_color) +
-  facet_wrap(vars(group)) +
+  facet_wrap(vars(group), nrow = 3) +
   scale_color_manual(values = rep("#F2BB16", 6)) +
   guides(color = "none") +
-  labs(title = "Schitt's Creek Personalities",
-       caption = "\nData Open-Source Psychometrics Project | Design Jenn Schilling") +
+  labs(title = str_to_upper("\nOpposites Attract in Schitt's Creek\n"),
+       caption = "\nData Open-Source Psychometrics Project | Design Jenn Schilling\n") +
   theme(plot.background = element_rect(fill = bcolor, color = NA),
         panel.background = element_rect(fill = bcolor, color = NA),
-        text = element_text(color = font_color),
+        text = element_text(size = 30, color = font_color),
+        strip.text = element_text(size = 80),
+        plot.title = element_text(size = 150, color = font_color, lineheight = 0.2),
+        plot.caption = element_text(size = 50, color = font_color),
         plot.margin = margin(10, 10, 10, 10))
 
 
-# Change the text to white
+# Change the text to white for labels and remove text for percents
 
-## FROM: https://stackoverflow.com/questions/72205539/change-axis-title-text-color-in-ggradar
+## CODE FROM: https://stackoverflow.com/questions/72205539/change-axis-title-text-color-in-ggradar
 
-# Text layers
-is_text <- sapply(p$layers, function(x) inherits(x$geom, "GeomText") && 
-                    (any(x$data$text %in% names(sc_chars_radar)) || any(x$data$text %in% c(0, 0.5, 1))))
+# Text layers - labels
+is_text <- sapply(p$layers, function(x) inherits(x$geom, "GeomText") && any(x$data$text %in% names(sc_chars_radar)))
 
+# Change to white
 p$layers[is_text] <- lapply(p$layers[is_text], function(x) { x$aes_params$colour <- "white"; x})
+# Make larger
+p$layers[is_text] <- lapply(p$layers[is_text], function(x) { x$aes_params$size <- 20; x})
+
+# Text layers - percentages
+is_text <- sapply(p$layers, function(x) inherits(x$geom, "GeomText") && any(x$data$text %in% c(0, 0.5, 1)))
+
+# Change to NA
+p$layers[is_text] <- lapply(p$layers[is_text], function(x) { x$aes_params$colour <- NA; x})
 
 p
 
 #### Save ####
 
-# Manually saved from the plot window
-
+ggsave(here("2022-08-16", "schitts.png"),
+       plot = last_plot(),
+       device = "png",
+       type = "cairo", 
+       width = 15,
+       height = 22)  
