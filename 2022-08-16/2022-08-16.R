@@ -10,6 +10,7 @@ library(scales)
 library(ggtext)
 library(showtext)
 library(ggradar)
+library(ggimage)
 
 #### Get the Data ####
 
@@ -19,24 +20,24 @@ myers_briggs <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidy
 
 
 myers_briggs <- myers_briggs %>%
-  # Source: https://www.16personalities.com/personality-types
+  # Source: https://www.truity.com/page/16-personality-types-myers-briggs
   mutate(label = case_when(
-    myers_briggs == "INTJ" ~ "Architect",
-    myers_briggs == "InTP" ~ "Logician",
+    myers_briggs == "INTJ" ~ "Mastermind",
+    myers_briggs == "INTP" ~ "Architect",
     myers_briggs == "ENTJ" ~ "Commander",
-    myers_briggs == "ENTP" ~ "Debater",
-    myers_briggs == "INFJ" ~ "Advocate",
-    myers_briggs == "INFP" ~ "Mediator",
-    myers_briggs == "ENFJ" ~ "Protagonist",
-    myers_briggs == "ENFP" ~ "Campaigner",
-    myers_briggs == "ISTJ" ~ "Logistician",
-    myers_briggs == "ISFJ" ~ "Defender",
-    myers_briggs == "ESTJ" ~ "Executive",
-    myers_briggs == "ESFJ" ~ "Consul",
-    myers_briggs == "ISTP" ~ "Virtuoso",
-    myers_briggs == "ISFP" ~ "Adventurer",
-    myers_briggs == "ESTP" ~ "Entrepreneur",
-    myers_briggs == "ESFP" ~ "Entertainer",
+    myers_briggs == "ENTP" ~ "Visionary",
+    myers_briggs == "INFJ" ~ "Counselor",
+    myers_briggs == "INFP" ~ "Healer",
+    myers_briggs == "ENFJ" ~ "Teacher",
+    myers_briggs == "ENFP" ~ "Champion",
+    myers_briggs == "ISTJ" ~ "Inspector",
+    myers_briggs == "ISFJ" ~ "Protector",
+    myers_briggs == "ESTJ" ~ "Supervisor",
+    myers_briggs == "ESFJ" ~ "Provider",
+    myers_briggs == "ISTP" ~ "Crafter",
+    myers_briggs == "ISFP" ~ "Composer",
+    myers_briggs == "ESTP" ~ "Dynamo",
+    myers_briggs == "ESFP" ~ "Performer",
     TRUE ~ "None"))
 
 sc_mb <- myers_briggs %>%
@@ -44,7 +45,15 @@ sc_mb <- myers_briggs %>%
   group_by(char_name) %>%
   mutate(max_match = max(avg_match_perc)) %>%
   ungroup() %>%
-  filter(max_match == avg_match_perc) 
+  filter(max_match == avg_match_perc) %>%
+  group_by(char_name) %>%
+  mutate(label_comb = ifelse(is.na(lag(label)), label, paste(label, lag(label), sep = "/")),
+         mb_comb = ifelse(is.na(lag(myers_briggs)), myers_briggs, paste(myers_briggs, lag(myers_briggs), sep = "/")),
+         label = paste(label_comb, mb_comb, sep = ", ")) %>%
+  ungroup() %>%
+  filter(!(char_name == "David Rose" & label_comb == "Visionary")) %>%
+  left_join(characters , by = c("char_id" = "id", "char_name" = "name",
+                                "uni_id", "uni_name"))
 
 # Get personality characteristics of interest
 sc_chars <- characters %>%
@@ -89,7 +98,7 @@ line_color <- "#FFFFFF" # white
 bcolor <- "#000000" # black
 
 
-#### Plot ####
+#### Plot 1 ####
 
 p <- ggradar(plot.data = sc_chars_radar %>% select(-image_link, -name),
         font.radar = font,
@@ -140,3 +149,47 @@ ggsave(here("2022-08-16", "schitts.png"),
        type = "cairo", 
        width = 15,
        height = 22)  
+
+#### Plot 2 ####
+
+ggplot(data = sc_mb,
+       mapping = aes(x = "0",
+                     y = "0",
+                     label = label,
+                     image = image_link)) +
+  geom_image(size = 0.9) +
+  geom_text(family = font,
+            color = "#F2BB16",
+            size = 10,
+            nudge_y = 0.6,
+            nudge_x = -0.57,
+            hjust = 0,
+            lineheight = 0.3) +
+  facet_wrap(~ char_name) +
+  labs(title = "Schitt's Creek Personality Chart\n",
+       caption = "Based on Myers-Briggs personality types.\nData Open-Source Psychometrics Project | Design Jenn Schilling") +
+  coord_cartesian(clip = "off") +
+  theme(plot.background = element_rect(fill = bcolor, color = NA),
+        panel.background = element_rect(fill = bcolor, color = NA),
+        text = element_text(size = 20, color = font_color),
+        strip.text = element_text(size = 40, hjust = 0, color = font_color),
+        strip.background = element_blank(),
+        plot.title = element_text(size = 70, color = "#F2BB16", lineheight = 0.05),
+        plot.subtitle = element_text(size = 30, color = font_color, lineheight = 0.2),
+        plot.caption = element_text(size = 20, color = font_color, lineheight = 0.5),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid.major = element_blank(),
+        plot.margin = margin(10, 10, 10, 10))
+
+#### Save ####
+
+ggsave(here("2022-08-16", "schitts_2.png"),
+       plot = last_plot(),
+       device = "png",
+       type = "cairo", 
+       width = 7.2,
+       height = 6)  
+
