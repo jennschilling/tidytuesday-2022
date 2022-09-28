@@ -2,6 +2,9 @@
 
 Data visualizations developed in R using data from [#TidyTuesday 2022](https://github.com/rfordatascience/tidytuesday/tree/master/data/2022).
 
+# 27 September 202
+![](https://github.com/jennschilling/tidytuesday-2022/blob/main/2022-09-27/us_writers_race.png)
+
 # 13 September 2022
 ![](https://github.com/jennschilling/tidytuesday-2022/blob/main/2022-09-13/bigfoot_wc.png)
 
