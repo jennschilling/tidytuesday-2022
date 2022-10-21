@@ -76,7 +76,7 @@ ggplot() +
                       mapping = aes(x = rating_average,
                                     y = yarn_weight_name,
                                     fill = yarn_weight_name),
-                      alpha = 0.7,
+                      alpha = 0.6,
                       color = NA) +
   annotate("text",
            x = avg_rating,
