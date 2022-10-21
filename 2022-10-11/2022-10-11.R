@@ -113,7 +113,7 @@ ggplot() +
                                "#870c25", "#dc143c")) +
   coord_cartesian(clip = "off") +
   labs(x = "Average Rating of Pattern",
-       title = "Ravelery patterns in lighter weight yarns\ntend to have higher average ratings.",
+       title = "Ravelry patterns in lighter weight yarns\ntend to have higher average ratings.",
        caption = "Data: ravelry.com by way of Alice Walsh | Design: Jenn Schilling") +
   theme(panel.background = element_rect(fill = bcolor, colour = NA),
         plot.background = element_rect(fill = bcolor, colour = NA),
