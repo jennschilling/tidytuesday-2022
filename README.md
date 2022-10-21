@@ -5,6 +5,9 @@ Data visualizations developed in R using data from [#TidyTuesday 2022](https://g
 # 18 October 2022
 ![](https://github.com/jennschilling/tidytuesday-2022/blob/main/2022-10-18/stranger_things.png)
 
+# 11 October 2022
+![](https://github.com/jennschilling/tidytuesday-2022/blob/main/2022-10-11/yarn_plot.png)
+
 # 04 October 2022
 ![](https://github.com/jennschilling/tidytuesday-2022/blob/main/2022-10-04/product_hunt_network.png)
 
