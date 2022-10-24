@@ -11,7 +11,6 @@ library(ggtext)
 library(showtext)
 library(ggridges)
 library(patchwork)
-library(png)
 
 #### Get the Data ####
 
@@ -47,9 +46,6 @@ yarn_p <- yarn %>%
                                          paste0(yarn_weight_name, " (N = ", comma(n), ')')))
 
 avg_rating <- mean(yarn_p$rating_total / yarn_p$rating_count)
-
-
-#Wool icons created by Freepik - Flaticon
 
 #### Formatting ####
 
