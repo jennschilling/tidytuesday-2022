@@ -10,6 +10,7 @@ library(scales)
 library(ggtext)
 library(showtext)
 library(ggbump)
+library(patchwork)
 library(bakeoff)
 
 #### Get the Data ####
@@ -256,4 +257,284 @@ ggsave(here("2022-10-25", "bakeoff.png"),
        height = 3)
 
 
+#### Make Instagram Version ####
+
+
+# Title/First Image
+
+ggplot(data = winners,
+       mapping = aes(x = episode,
+                     y = technical)) +
+  # Shading for cake layers
+  geom_rect(mapping = aes(xmin = 1, xmax = 10,
+                          ymin = 1, ymax = 3),
+            color = NA,
+            fill = "#590219",
+            alpha = 0.5) +
+  geom_rect(mapping = aes(xmin = 1, xmax = 10,
+                          ymin = 3, ymax = 5),
+            color = NA,
+            fill = "#73022C",
+            alpha = 0.5) +
+  geom_rect(mapping = aes(xmin = 1, xmax = 10,
+                          ymin = 5, ymax = 12),
+            color = NA,
+            fill = "#D982B2",
+            alpha = 0.5) +
+  # Technical Standing
+  geom_bump(size = 0.3,
+            alpha = 0.8,
+            color = "#F2F2F2") +
+  geom_point(data = winners %>% filter(!star_baker),
+             size = 0.5,
+             color = "#F2F2F2") + 
+  # Star Baker
+  geom_point(data = winners %>% filter(star_baker),
+             mapping = aes(shape = star_baker),
+             size = 6,
+             color = "#F2F2F2") +
+  # Age bin lines
+  geom_polygon(data = lines %>% filter(line == 1),
+               mapping = aes(x = x,
+                             y = y),
+               fill = "#F2F2F2") +
+  geom_polygon(data = lines %>% filter(line == 2),
+               mapping = aes(x = x,
+                             y = y),
+               fill = "#F2F2F2") +
+  geom_polygon(data = lines %>% filter(line == 3),
+               mapping = aes(x = x,
+                             y = y),
+               fill = "#F2F2F2") +
+  geom_polygon(data = lines %>% filter(line == 4),
+               mapping = aes(x = x,
+                             y = y),
+               fill = "#F2F2F2") +
+  # Plot formatting
+  scale_y_reverse(breaks = c(1, 3, 5, 12),
+                  labels = c("First in Technical", "Third", "Fifth", "Twelfth")) +
+  scale_x_continuous(breaks = seq(1, 10, 1)) +
+  scale_shape_manual(values = c("\u2605"),
+                     limits = c(TRUE),
+                     labels = c("Star Baker")) +
+  guides(shape = "none") +
+  facet_wrap(~ reorder(baker_label, series),
+             scale = "free_x",
+             nrow = 2) +
+  coord_cartesian(clip = "off",
+                  expand = FALSE) +
+  labs(title = "\nWhat does it take to win the Great\nBritish Bake Off?\n",
+       subtitle = "Winners tend to place at least fifth in the technical challenge throughout\nthe series. A star indicates the winner earned Star Baker that episode.\nWinners do not earn Star Baker very frequently. Lines indicate age:\n1 line 20-29, 2 lines 30-39, 3 lines 40-49, and 4 lines over 50. The median\nage of all bakers is 34. The median age of winners is 31, and most\nwinners are in their 30s.\n",
+       caption  = "\nSeries 1 and 2 had only 6 and 8 episodes, respectively. All other series had 10 episodes.\nData: {bakeoff} package | Design: Jenn Schilling",
+       x = "Episodes →",
+       shape = "") +
+  theme_bw(base_family = font) +
+  theme(axis.line.y = element_blank(), 
+        axis.line.x = element_line(color = "#59514A", size = 0.5),
+        axis.ticks = element_blank(), 
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        
+        strip.background = element_blank(),
+        strip.text = element_text(size = 14, color = font_color, family = font, 
+                                  hjust = 0.5, face = "bold"),
+        
+        panel.grid = element_blank(),
+        panel.border = element_blank(),
+        
+        plot.background = element_rect(fill = bcolor, color = NA),
+        panel.background = element_rect(fill = bcolor, color = NA),
+        
+        legend.position = "top",
+        legend.text = element_text(color = font_color, family = font),
+        legend.background = element_blank(),
+        
+        plot.title.position = "plot",
+        plot.title = element_text(size = 40, color = font_color,
+                                  lineheight = 0.3, face = "bold", family = font),
+        plot.subtitle = element_text(size = 23, color = font_color,
+                                     lineheight = 0.4, family = font),
+        plot.caption.position = "plot",
+        plot.caption = element_text(size = 12, color = font_color, 
+                                    lineheight = 0.3, hjust = 1, family = font),
+        
+        plot.margin = margin(10, 10, 10, 10))
+
+ggsave(here("2022-10-25", "bakeoff_1.png"),
+       plot = last_plot(),
+       device = "png",
+       width = 4,
+       height = 4)
+
+# Make sub-plots for groups of winners
+
+make_plots <- function(s1, s2){
+  
+  plot_dat <- winners %>% filter(series >= s1 & series <= s2)
+  line_dat <- lines %>% filter(series >= s1 & series <= s2)
+  
+  if(s2 == 10){
+    cap = ""
+  }else{
+    cap = "\n\n\nData: {bakeoff} package | Design: Jenn Schilling"
+  }
+  
+  p <- ggplot(data = plot_dat,
+         mapping = aes(x = episode,
+                       y = technical)) +
+    # Shading for cake layers
+    geom_rect(mapping = aes(xmin = 1, xmax = 10,
+                            ymin = 1, ymax = 3),
+              color = NA,
+              fill = "#590219",
+              alpha = 0.5) +
+    geom_rect(mapping = aes(xmin = 1, xmax = 10,
+                            ymin = 3, ymax = 5),
+              color = NA,
+              fill = "#73022C",
+              alpha = 0.5) +
+    geom_rect(mapping = aes(xmin = 1, xmax = 10,
+                            ymin = 5, ymax = 12),
+              color = NA,
+              fill = "#D982B2",
+              alpha = 0.5) +
+    # Technical Standing
+    geom_bump(size = 1,
+              alpha = 0.8,
+              color = "#F2F2F2") +
+    geom_point(data = plot_dat %>% filter(!star_baker),
+               size = 1.5,
+               color = "#F2F2F2") + 
+    # Star Baker
+    geom_point(data = plot_dat %>% filter(star_baker),
+               mapping = aes(shape = star_baker),
+               size = 12,
+               color = "#F2F2F2") +
+    # Age bin lines
+    geom_polygon(data = line_dat %>% filter(line == 1),
+                 mapping = aes(x = x,
+                               y = y),
+                 fill = "#F2F2F2") +
+    geom_polygon(data = line_dat %>% filter(line == 2),
+                 mapping = aes(x = x,
+                               y = y),
+                 fill = "#F2F2F2") +
+    geom_polygon(data = line_dat %>% filter(line == 3),
+                 mapping = aes(x = x,
+                               y = y),
+                 fill = "#F2F2F2") +
+    geom_polygon(data = line_dat %>% filter(line == 4),
+                 mapping = aes(x = x,
+                               y = y),
+                 fill = "#F2F2F2") +
+    # Plot formatting
+    scale_y_reverse(breaks = c(1, 3, 5, 12),
+                    labels = c("First in Technical", "Third", "Fifth", "Twelfth")) +
+    scale_x_continuous(breaks = seq(1, 10, 1)) +
+    scale_shape_manual(values = c("\u2605"),
+                       limits = c(TRUE),
+                       labels = c("Star Baker")) +
+    guides(shape = "none") +
+    facet_wrap(~ reorder(baker_label, series),
+               scale = "free_x",
+               ncol = 2,
+               nrow = 2,
+               as.table = TRUE) +
+    coord_cartesian(clip = "off",
+                    expand = FALSE) +
+    labs(subtitle = "\n",
+         caption  = cap,
+         x = "Episodes →",
+         shape = "") +
+    theme_bw(base_family = font) +
+    theme(axis.line.y = element_blank(), 
+          axis.line.x = element_line(color = "#59514A", size = 0.5),
+          axis.ticks = element_blank(), 
+          axis.text.y = element_text(size = 18, color = font_color, family = font,
+                                     hjust = 1),
+          axis.text.x = element_blank(),
+          axis.title.x = element_text(size = 18, color = font_color, family = font,
+                                      hjust = 0),
+          axis.title.y = element_blank(),
+          
+          strip.background = element_blank(),
+          strip.text = element_text(size = 24, color = font_color, family = font, 
+                                    hjust = -0.1, face = "bold"),
+          
+          panel.grid = element_blank(),
+          panel.border = element_blank(),
+          
+          plot.background = element_rect(fill = bcolor, color = NA),
+          panel.background = element_rect(fill = bcolor, color = NA),
+          
+          legend.position = "top",
+          legend.text = element_text(color = font_color, family = font),
+          legend.background = element_blank(),
+          
+          plot.title.position = "plot",
+          plot.title = element_text(size = 35, color = font_color,
+                                    lineheight = 0.3, face = "bold", family = font),
+          plot.subtitle = element_text(size = 16, color = font_color,
+                                       lineheight = 0.3, family = font),
+          plot.caption.position = "plot",
+          plot.caption = element_text(size = 14, color = font_color, 
+                                      lineheight = 0.3, hjust = 1, family = font),
+          
+          plot.margin = margin(10, 10, 10, 10))
+  
+  if(s2 == 10){
+    
+    p2 <- ggplot() +
+      theme_void() +
+      labs(caption = "\n\n\nData: {bakeoff} package | Design: Jenn Schilling") +
+      theme(plot.background = element_rect(fill = bcolor, color = NA),
+            panel.background = element_rect(fill = bcolor, color = NA),
+            panel.border = element_blank(),
+            plot.caption.position = "plot",
+            plot.caption = element_text(size = 14, color = font_color, 
+                                        lineheight = 0.3, hjust = 1, family = font),
+            plot.margin = margin(10, 10, 10, 10))
+    
+    p + p2 + 
+      plot_layout(nrow = 2, heights = c(1.5, 1)) +
+      plot_annotation(theme = theme(plot.background = element_rect(fill = bcolor, color = NA),
+                                    panel.background = element_rect(fill = bcolor, color = NA),
+                                    panel.border = element_blank(),
+                                    plot.caption.position = "plot",
+                                    plot.caption = element_text(size = 14, color = font_color, 
+                                                                lineheight = 0.3, hjust = 1, family = font),
+                                    plot.margin = margin(0, 0, 0, 0)))
+    
+    
+  }else{
+    p
+  }
+  
+  
+}
+
+
+make_plots(1, 4)
+
+ggsave(here("2022-10-25", "bakeoff_2.png"),
+       plot = last_plot(),
+       device = "png",
+       width = 4,
+       height = 4)
+
+make_plots(5, 8)
+
+ggsave(here("2022-10-25", "bakeoff_3.png"),
+       plot = last_plot(),
+       device = "png",
+       width = 4,
+       height = 4)
+
+make_plots(9, 10)
+
+ggsave(here("2022-10-25", "bakeoff_4.png"),
+       plot = last_plot(),
+       device = "png",
+       width = 4,
+       height = 4)
 
