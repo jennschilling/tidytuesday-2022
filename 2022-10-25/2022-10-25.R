@@ -142,10 +142,6 @@ bcolor <- "#B0C1D9"
 #### Plot ####
 
 # What does it take to win bakeoff?
-# Track winners over episodes - how do they do in technicals, are they star baker
-# Plot age distribution
-# Plot hometown locations
-# Include occupations?
 
 ggplot(data = winners,
        mapping = aes(x = episode,
