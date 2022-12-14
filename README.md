@@ -2,6 +2,9 @@
 
 Data visualizations developed in R using data from [#TidyTuesday 2022](https://github.com/rfordatascience/tidytuesday/tree/master/data/2022).
 
+# 13 December 2022
+![](https://github.com/jennschilling/tidytuesday-2022/blob/main/2022-12-13/sales_retail.png)
+
 # 1 November 2022
 ![](https://github.com/jennschilling/tidytuesday-2022/blob/main/2022-11-01/horror.png)
 
